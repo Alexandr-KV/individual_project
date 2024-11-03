@@ -34,7 +34,7 @@ public class NoteRepository {
         return notes;
     }
 
-    public Note readNoteById(long id, User user) throws SQLException, NoteNotFoundException {
+    public Note readNoteById(Long id, User user) throws SQLException, NoteNotFoundException {
         PreparedStatement ps = connection.prepareStatement("SELECT * FROM notes WHERE id = (?) AND user_id = (?)");
         ps.setLong(1, id);
         ps.setLong(2, user.getId());
