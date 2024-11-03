@@ -26,6 +26,20 @@ CREATE TABLE role (
 	role TEXT NOT NULL
 );
 
+CREATE TABLE hashtag (
+	id	INTEGER NOT NULL,
+	title	TEXT NOT NULL,
+	user_id INTEGER NOT NULL,
+	PRIMARY KEY("id" AUTOINCREMENT)
+)
+
+CREATE TABLE hashtag_note_link (
+	id INTEGER NOT NULL,
+	id_hashtag INTEGER NOT NULL,
+	id_note INTEGER NOT NULL,
+	PRIMARY KEY(id AUTOINCREMENT)
+)
+
 INSERT INTO role (id,role) VALUES (1,"ADMIN");
 INSERT INTO role (id,role) VALUES (2,"CLIENT");
 INSERT INTO role (id,role) VALUES (3,"NOT_REGISTERED");

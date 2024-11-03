@@ -1,9 +1,11 @@
 package project;
 
 
+import project.controller.HashtagController;
 import project.controller.NoteController;
 import project.controller.UserController;
 import project.exception.*;
+import project.repository.HashtagRepository;
 import project.repository.NoteRepository;
 import project.repository.RoleRepository;
 import project.repository.UserRepository;
@@ -36,13 +38,15 @@ public class Main {
         RoleRepository roleRepository = new RoleRepository(connection, statement);
         UserRepository userRepository = new UserRepository(connection, statement, roleRepository);
         NoteRepository noteRepository = new NoteRepository(connection, statement);
+        HashtagRepository hashtagRepository = new HashtagRepository(connection, statement, noteRepository);
         JwtUtils jwtUtils = new JwtUtils(Jwts.SIG.HS256.key().build());
         NoteController noteController = new NoteController(noteRepository);
         UserController userController = new UserController(userRepository, jwtUtils);
+        HashtagController hashtagController = new HashtagController(hashtagRepository);
         AuthService authService = new AuthService(userRepository, roleRepository, jwtUtils);
 
         Javalin.create()
-                .events(eventConfig -> eventConfig.serverStopping(()->{
+                .events(eventConfig -> eventConfig.serverStopping(() -> {
                     connection.close();
                     statement.close();
                 }))
@@ -60,13 +64,21 @@ public class Main {
                 .exception(RegistrationException.class, ExceptionHandler::handleRegistrationException)
                 .exception(LoginException.class, ExceptionHandler::handleLoginException)
                 .exception(AuthException.class, ExceptionHandler::handleAuthException)
-                .exception(Exception.class, ExceptionHandler :: handleException)
+                .exception(Exception.class, ExceptionHandler::handleException)
+
 
                 .get("/note", noteController::getAllNotes, CLIENT, ADMIN)
                 .get("/note/{id}", noteController::getNoteById, CLIENT, ADMIN)
                 .post("/note", noteController::postNote, CLIENT, ADMIN)
                 .patch("/note/{id}", noteController::patchNote, CLIENT, ADMIN)
                 .delete("/note/{id}", noteController::deleteNote, CLIENT, ADMIN)
+
+                .get("/hashtag", hashtagController::getAllHashtags, CLIENT, ADMIN)
+                .get("/hashtag/{id}", hashtagController::getNotesByHashtag, CLIENT, ADMIN)
+                .post("/hashtag", hashtagController::postHashtag, CLIENT, ADMIN)
+                .post("/hashtagLinkToNote", hashtagController::hashtagLinkToNote, CLIENT, ADMIN)
+                .post("/hashtagUnlinkingToNote", hashtagController::hashtagUnlinkingToNote, CLIENT, ADMIN)
+                .delete("/hashtag/{id}", hashtagController::deleteHashtag, CLIENT, ADMIN)
 
                 .post("/registration", userController::registrationUser, NOT_REGISTERED)
                 .post("/login", userController::loginUser, NOT_REGISTERED)
